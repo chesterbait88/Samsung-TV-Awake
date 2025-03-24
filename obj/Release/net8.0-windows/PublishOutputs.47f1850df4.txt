@@ -1,8 +1,0 @@
-C:\TVMonitorApp\bin\Release\net8.0-windows\publish\TVMonitorApp.exe
-C:\TVMonitorApp\bin\Release\net8.0-windows\publish\Resources\app.ico
-C:\TVMonitorApp\bin\Release\net8.0-windows\publish\TVMonitorApp.dll
-C:\TVMonitorApp\bin\Release\net8.0-windows\publish\TVMonitorApp.deps.json
-C:\TVMonitorApp\bin\Release\net8.0-windows\publish\TVMonitorApp.runtimeconfig.json
-C:\TVMonitorApp\bin\Release\net8.0-windows\publish\TVMonitorApp.pdb
-C:\TVMonitorApp\bin\Release\net8.0-windows\publish\System.Management.dll
-C:\TVMonitorApp\bin\Release\net8.0-windows\publish\runtimes\win\lib\net8.0\System.Management.dll

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 using TVMonitorApp.Forms;
 using TVMonitorApp.Utils;
@@ -35,10 +36,14 @@ namespace TVMonitorApp
             // Initialize monitoring
             monitor = new TVMonitor(configManager);
 
-            // Initialize tray icon
+            // Load custom icon from resources
+            string iconPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "app.ico");
+            Icon appIcon = File.Exists(iconPath) ? new Icon(iconPath) : SystemIcons.Application;
+
+            // Initialize tray icon with custom icon
             trayIcon = new NotifyIcon()
             {
-                Icon = SystemIcons.Application, // We'll replace this with a custom icon
+                Icon = appIcon,
                 ContextMenuStrip = CreateContextMenu(),
                 Visible = true,
                 Text = "TV Monitor"

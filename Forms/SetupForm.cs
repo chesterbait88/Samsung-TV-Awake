@@ -21,7 +21,7 @@ namespace TVMonitorApp.Forms
             
             // Form properties
             this.Text = "TV Monitor Setup";
-            this.ClientSize = new System.Drawing.Size(500, 400);
+            this.ClientSize = new System.Drawing.Size(600, 540); // Made form slightly taller
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -66,13 +66,31 @@ namespace TVMonitorApp.Forms
                 Maximum = 300,
                 Value = 60
             };
+
+            Label timeoutLabel = new Label
+            {
+                Text = "Ping Timeout (ms):",
+                Location = new System.Drawing.Point(20, 125),
+                Size = new System.Drawing.Size(120, 25)
+            };
+            
+            NumericUpDown timeoutNumeric = new NumericUpDown
+            {
+                Name = "timeoutNumeric",
+                Location = new System.Drawing.Point(150, 125),
+                Size = new System.Drawing.Size(100, 25),
+                Minimum = 500,
+                Maximum = 5000,
+                Increment = 100,
+                Value = 1000
+            };
             
             // SmartThings section
             Label smartThingsSectionLabel = new Label
             {
                 Text = "SmartThings TV Setup",
                 Font = new System.Drawing.Font(this.Font.FontFamily, 12, System.Drawing.FontStyle.Bold),
-                Location = new System.Drawing.Point(20, 135),
+                Location = new System.Drawing.Point(20, 170),
                 Size = new System.Drawing.Size(460, 25)
             };
             
@@ -81,35 +99,35 @@ namespace TVMonitorApp.Forms
                 Text = "To control your Samsung TV, you'll need to get your SmartThings\n" +
                       "access token and device ID. Visit the SmartThings Developer\n" +
                       "website to create a personal access token with proper permissions.",
-                Location = new System.Drawing.Point(20, 165),
+                Location = new System.Drawing.Point(20, 200),
                 Size = new System.Drawing.Size(460, 60)
             };
             
             Label tokenLabel = new Label
             {
                 Text = "SmartThings Access Token:",
-                Location = new System.Drawing.Point(20, 230),
+                Location = new System.Drawing.Point(20, 265),
                 Size = new System.Drawing.Size(130, 25)
             };
             
             TextBox tokenTextBox = new TextBox
             {
                 Name = "tokenTextBox",
-                Location = new System.Drawing.Point(150, 230),
+                Location = new System.Drawing.Point(150, 265),
                 Size = new System.Drawing.Size(300, 25)
             };
             
             Label deviceIdLabel = new Label
             {
                 Text = "TV Device ID:",
-                Location = new System.Drawing.Point(20, 265),
+                Location = new System.Drawing.Point(20, 300),
                 Size = new System.Drawing.Size(130, 25)
             };
             
             TextBox deviceIdTextBox = new TextBox
             {
                 Name = "deviceIdTextBox",
-                Location = new System.Drawing.Point(150, 265),
+                Location = new System.Drawing.Point(150, 300),
                 Size = new System.Drawing.Size(300, 25)
             };
             
@@ -118,7 +136,7 @@ namespace TVMonitorApp.Forms
             {
                 Name = "autoStartCheckBox",
                 Text = "Start automatically with Windows",
-                Location = new System.Drawing.Point(20, 310),
+                Location = new System.Drawing.Point(20, 345),
                 Size = new System.Drawing.Size(300, 25),
                 Checked = true
             };
@@ -128,7 +146,7 @@ namespace TVMonitorApp.Forms
             {
                 Name = "saveButton",
                 Text = "Save",
-                Location = new System.Drawing.Point(310, 350),
+                Location = new System.Drawing.Point(310, 385),
                 Size = new System.Drawing.Size(80, 30),
                 DialogResult = DialogResult.OK
             };
@@ -138,7 +156,7 @@ namespace TVMonitorApp.Forms
             {
                 Name = "cancelButton",
                 Text = "Cancel",
-                Location = new System.Drawing.Point(400, 350),
+                Location = new System.Drawing.Point(400, 385),
                 Size = new System.Drawing.Size(80, 30),
                 DialogResult = DialogResult.Cancel
             };
@@ -147,6 +165,7 @@ namespace TVMonitorApp.Forms
             this.Controls.AddRange(new Control[] {
                 deviceSectionLabel, ipLabel, ipTextBox, 
                 intervalLabel, intervalNumeric,
+                timeoutLabel, timeoutNumeric,
                 smartThingsSectionLabel, instructionsLabel,
                 tokenLabel, tokenTextBox,
                 deviceIdLabel, deviceIdTextBox,
@@ -167,6 +186,7 @@ namespace TVMonitorApp.Forms
                 // Load existing settings if available
                 if (this.Controls["ipTextBox"] is TextBox ipBox &&
                     this.Controls["intervalNumeric"] is NumericUpDown intervalBox &&
+                    this.Controls["timeoutNumeric"] is NumericUpDown timeoutBox &&
                     this.Controls["tokenTextBox"] is TextBox tokenBox &&
                     this.Controls["deviceIdTextBox"] is TextBox deviceIdBox)
                 {
@@ -178,6 +198,12 @@ namespace TVMonitorApp.Forms
                         if (int.TryParse(intervalStr, out int interval))
                         {
                             intervalBox.Value = Math.Max(intervalBox.Minimum, Math.Min(intervalBox.Maximum, interval));
+                        }
+
+                        string timeoutStr = configManager.GetValue("DeviceMonitor", "ping_timeout", "1000");
+                        if (int.TryParse(timeoutStr, out int timeout))
+                        {
+                            timeoutBox.Value = Math.Max(timeoutBox.Minimum, Math.Min(timeoutBox.Maximum, timeout));
                         }
                     }
                     
@@ -201,6 +227,7 @@ namespace TVMonitorApp.Forms
             {
                 if (!(this.Controls["ipTextBox"] is TextBox ipBox &&
                     this.Controls["intervalNumeric"] is NumericUpDown intervalBox &&
+                    this.Controls["timeoutNumeric"] is NumericUpDown timeoutBox &&
                     this.Controls["tokenTextBox"] is TextBox tokenBox &&
                     this.Controls["deviceIdTextBox"] is TextBox deviceIdBox &&
                     this.Controls["autoStartCheckBox"] is CheckBox autoStartBox))
@@ -238,6 +265,7 @@ namespace TVMonitorApp.Forms
                 // Save configuration
                 configManager.SetValue("DeviceMonitor", "device_ip", ipBox.Text);
                 configManager.SetValue("DeviceMonitor", "check_interval", intervalBox.Value.ToString());
+                configManager.SetValue("DeviceMonitor", "ping_timeout", timeoutBox.Value.ToString());
                 configManager.SetValue("SmartThings", "access_token", tokenBox.Text);
                 configManager.SetValue("SmartThings", "tv_device_id", deviceIdBox.Text);
                 configManager.SaveConfiguration();

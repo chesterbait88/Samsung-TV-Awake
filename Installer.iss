@@ -5,27 +5,29 @@
 #define MyAppSourceDir "bin\Release\net8.0-windows"
 
 [Setup]
-; NOTE: The value of AppId uniquely identifies this application.
-; Do not use the same AppId value in installers for other applications.
 AppId={{EDA6E64B-3F8A-4FA8-B9C7-9F3ED2D6D5A0}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
-DefaultDirName={autopf}\{#MyAppName}
+DefaultDirName={commonpf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 OutputBaseFilename=TVMonitorSetup
 Compression=lzma
 SolidCompression=yes
-PrivilegesRequired=lowest
+PrivilegesRequired=admin
 SetupIconFile=Resources\app.ico
+UninstallDisplayIcon={app}\{#MyAppExeName}
+OutputDir=Output
+Uninstallable=yes
+UsePreviousAppDir=no
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
-Name: "startupicon"; Description: "Start automatically with Windows"; GroupDescription: "Startup options"
+Name: "startupentry"; Description: "Start automatically with Windows"; GroupDescription: "Startup options"
 
 [Files]
 ; Main application files
@@ -41,19 +43,20 @@ Source: "{#MyAppSourceDir}\runtimes\win\lib\net8.0\System.Management.dll"; DestD
 ; Resources
 Source: "{#MyAppSourceDir}\Resources\app.ico"; DestDir: "{app}\Resources"; Flags: ignoreversion
 
-; Create empty directories
-Source: "{#MyAppSourceDir}\*"; DestDir: "{app}\Logs"; Flags: ignoreversion recursesubdirs createallsubdirs; Permissions: users-modify
+; Create empty directories with proper permissions
+Source: "{#MyAppSourceDir}\*"; DestDir: "{commonappdata}\{#MyAppName}"; Flags: ignoreversion recursesubdirs createallsubdirs; Permissions: users-modify
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
-Name: "{userstartup}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: startupicon
+Name: "{commondesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [Registry]
-Root: HKA; Subkey: "Software\{#MyAppName}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\{#MyAppName}"; Flags: uninsdeletekey
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Run"; ValueType: string; ValueName: "{#MyAppName}"; ValueData: """{app}\{#MyAppExeName}"""; Flags: uninsdeletevalue; Tasks: startupentry
+Root: HKLM; Subkey: "Software\Microsoft\Windows\CurrentVersion\Uninstall\{#MyAppName}_is1"; ValueType: string; ValueName: "DisplayIcon"; ValueData: "{app}\{#MyAppExeName}"
 
 [Code]
 var
@@ -64,10 +67,18 @@ procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
   begin
-    if not FileExists(ExpandConstant('{app}\config.ini')) then
+    // Create and set permissions for config file in CommonAppData
+    if not FileExists(ExpandConstant('{commonappdata}\{#MyAppName}\config.ini')) then
     begin
-      SaveStringToFile(ExpandConstant('{app}\config.ini'), '', False);
-      Exec('icacls.exe', ExpandConstant('"{app}\config.ini" /grant Users:(M)'), '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+      SaveStringToFile(ExpandConstant('{commonappdata}\{#MyAppName}\config.ini'), '', False);
+      Exec('icacls.exe', ExpandConstant('"{commonappdata}\{#MyAppName}\config.ini" /grant Users:(M)'), '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+    end;
+    
+    // Create and set permissions for Logs directory
+    if not DirExists(ExpandConstant('{commonappdata}\{#MyAppName}\Logs')) then
+    begin
+      CreateDir(ExpandConstant('{commonappdata}\{#MyAppName}\Logs'));
+      Exec('icacls.exe', ExpandConstant('"{commonappdata}\{#MyAppName}\Logs" /grant Users:(M)'), '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
     end;
   end;
 end;
