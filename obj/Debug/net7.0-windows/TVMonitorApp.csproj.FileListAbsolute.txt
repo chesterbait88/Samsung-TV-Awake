@@ -1,0 +1,5 @@
+C:\TVMonitorApp\obj\Debug\net7.0-windows\TVMonitorApp.csproj.AssemblyReference.cache
+C:\TVMonitorApp\obj\Debug\net7.0-windows\TVMonitorApp.GeneratedMSBuildEditorConfig.editorconfig
+C:\TVMonitorApp\obj\Debug\net7.0-windows\TVMonitorApp.AssemblyInfoInputs.cache
+C:\TVMonitorApp\obj\Debug\net7.0-windows\TVMonitorApp.AssemblyInfo.cs
+C:\TVMonitorApp\obj\Debug\net7.0-windows\TVMonitorApp.csproj.CoreCompileInputs.cache
